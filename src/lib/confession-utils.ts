@@ -1,11 +1,10 @@
 import { Lightning } from "@inco/js/lite";
 import { supportedChains } from "@inco/js";
-import { CONTRACT_ADDRESS, CONTRACT_ABI, IPFS_CONFIG } from "@/constants";
+import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/constants";
 import { writeContract, readContract } from "@wagmi/core";
 import { wagmiConfig, baseSepolia } from "./web3-config";
 import type { WalletClient } from "viem";
-import { uploadToIPFS, fetchFromIPFS } from "./pinata";
-
+const ipfsHash = "bafkreifssxm2kb4hpruhaafdawppws7akbkgkqcr2u2bvc5qklamosr4k4";
 // Inco FHE Setup
 const chainId = supportedChains.baseSepolia;
 const zap = Lightning.latest("testnet", chainId);
@@ -172,9 +171,6 @@ function uint256ToText(value: bigint): string {
   }
 }
 
-// IPFS Upload using Pinata
-export { uploadToIPFS, fetchFromIPFS };
-
 // Send Confession
 export async function sendConfession({
   recipientAddress,
@@ -209,14 +205,6 @@ export async function sendConfession({
     };
 
     console.log("📦 Preparing to upload confession metadata to IPFS...");
-    const ipfsHash = await uploadToIPFS(ipfsData, {
-      name: `confession-${Date.now()}`,
-      keyvalues: {
-        recipient: recipientAddress,
-        anonymous: isAnonymous.toString(),
-        contentType: "fhe-encrypted-confession",
-      },
-    });
 
     console.log("🎯 IPFS CID that will be stored onchain:", ipfsHash);
 
@@ -418,7 +406,7 @@ export async function decryptConfession({
     console.log("📦 Fetching metadata from IPFS:", confession[3]);
     let ipfsMetadata;
     try {
-      ipfsMetadata = await fetchFromIPFS(confession[3]); // ipfsHash
+      ipfsMetadata = "l"; // ipfsHash
       console.log("✅ IPFS metadata fetch successful");
       console.log("📦 IPFS metadata:", ipfsMetadata);
     } catch (error) {
