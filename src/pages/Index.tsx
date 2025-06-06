@@ -1,4 +1,3 @@
-
 import BottomNavigation from "@/components/BottomNavigation";
 import Feed from "./Feed";
 import Send from "./Send";
@@ -37,9 +36,7 @@ const Index = () => {
       </div>
 
       {/* Content */}
-      <main className="relative">
-        {renderContent()}
-      </main>
+      <main className="relative">{renderContent()}</main>
 
       {/* Bottom Navigation */}
       <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />

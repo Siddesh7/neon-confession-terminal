@@ -1,4 +1,3 @@
-
 import { Heart, Send, Wallet, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -7,7 +6,10 @@ interface BottomNavigationProps {
   onTabChange: (tab: string) => void;
 }
 
-const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => {
+const BottomNavigation = ({
+  activeTab,
+  onTabChange,
+}: BottomNavigationProps) => {
   const tabs = [
     { id: "feed", icon: Heart, label: "Feed" },
     { id: "send", icon: Send, label: "Send" },
@@ -32,10 +34,12 @@ const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => 
                   : "text-neon-cyan/70 hover:text-neon-cyan hover:bg-neon-cyan/10"
               )}
             >
-              <Icon className={cn(
-                "w-5 h-5 mb-1",
-                activeTab === id && "animate-glow-pulse"
-              )} />
+              <Icon
+                className={cn(
+                  "w-5 h-5 mb-1",
+                  activeTab === id && "animate-glow-pulse"
+                )}
+              />
               <span className="truncate">{label}</span>
             </button>
           ))}

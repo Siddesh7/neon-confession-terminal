@@ -1,101 +1,149 @@
-
 import ConfessionCard from "@/components/ConfessionCard";
-import { useEffect, useState } from "react";
-
-interface Confession {
-  id: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-  isAnonymous: boolean;
-  isEncrypted: boolean;
-}
+import { usePublicFeed } from "@/hooks/use-confessions";
+import { formatDistanceToNow } from "date-fns";
 
 const Feed = () => {
-  const [confessions, setConfessions] = useState<Confession[]>([]);
+  const { publicConfessions, loading, refetch } = usePublicFeed();
 
-  useEffect(() => {
-    // Mock data for demonstration
-    const mockConfessions: Confession[] = [
-      {
-        id: "conf_001",
-        content: "I still use Internet Explorer in 2024... Don't judge me, it makes me feel nostalgic for the good old days of dial-up and waiting 5 minutes for a single webpage to load.",
-        timestamp: "2H AGO",
-        likes: 42,
-        isAnonymous: true,
-        isEncrypted: false
-      },
-      {
-        id: "conf_002",
-        content: "Sometimes I pretend I'm a cyberpunk hacker when I'm just writing CSS. The neon lights on my keyboard help with the illusion.",
-        timestamp: "4H AGO",
-        likes: 127,
-        isAnonymous: true,
-        isEncrypted: false
-      },
-      {
-        id: "conf_003",
-        content: "I have a secret crush on my AI assistant. Is that weird? They always know exactly what to say...",
-        timestamp: "6H AGO",
-        likes: 89,
-        isAnonymous: false,
-        isEncrypted: true
-      },
-      {
-        id: "conf_004",
-        content: "I collect vintage keyboards from the 80s and pretend they're from the future. My apartment looks like a museum of retro-futurism.",
-        timestamp: "8H AGO",
-        likes: 234,
-        isAnonymous: true,
-        isEncrypted: false
-      },
-      {
-        id: "conf_005",
-        content: "Every night I dream in neon colors. I wake up disappointed that reality doesn't have RGB lighting built-in.",
-        timestamp: "12H AGO",
-        likes: 156,
-        isAnonymous: true,
-        isEncrypted: false
-      }
-    ];
+  console.log("📺 Feed component rendered");
+  console.log("📺 Feed state:", {
+    publicConfessionsCount: publicConfessions.length,
+    loading: loading,
+  });
 
-    setConfessions(mockConfessions);
-  }, []);
+  const formatTimestamp = (timestamp: bigint) => {
+    const date = new Date(Number(timestamp) * 1000);
+    return formatDistanceToNow(date, { addSuffix: true }).toUpperCase();
+  };
+
+  const handleRefresh = () => {
+    console.log("🔄 Manual refresh button clicked on Feed page");
+    refetch();
+  };
+
+  if (loading) {
+    console.log("📺 Feed is loading - showing loading message");
+    return (
+      <div className="min-h-screen pb-20 pt-6">
+        <div className="container mx-auto px-4 max-w-2xl">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1
+              className="text-4xl font-orbitron font-bold text-neon-pink mb-2 neon-glow glitch-effect"
+              data-text="PUBLIC CONFESSION FEED"
+            >
+              PUBLIC CONFESSION FEED
+            </h1>
+            <p className="text-neon-cyan mono-text">
+              // SHARED THOUGHTS FROM THE DIGITAL CONSCIOUSNESS
+            </p>
+          </div>
+
+          {/* Loading state */}
+          <div className="text-center">
+            <div className="text-neon-cyan mono-text animate-pulse">
+              LOADING PUBLIC CONFESSIONS FROM THE BLOCKCHAIN...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  console.log("📺 Feed loaded - rendering public confessions");
 
   return (
     <div className="min-h-screen pb-20 pt-6">
       <div className="container mx-auto px-4 max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-orbitron font-bold text-neon-pink mb-2 neon-glow glitch-effect" data-text="CONFESSION FEED">
-            CONFESSION FEED
+          <h1
+            className="text-4xl font-orbitron font-bold text-neon-pink mb-2 neon-glow glitch-effect"
+            data-text="PUBLIC CONFESSION FEED"
+          >
+            PUBLIC CONFESSION FEED
           </h1>
           <p className="text-neon-cyan mono-text">
-            // ANONYMOUS THOUGHTS FROM THE DIGITAL VOID
+            // SHARED THOUGHTS FROM THE DIGITAL CONSCIOUSNESS
           </p>
+          <button
+            onClick={handleRefresh}
+            className="mt-2 text-xs text-neon-purple mono-text hover:text-neon-cyan transition-colors"
+          >
+            [REFRESH FEED]
+          </button>
         </div>
 
-        {/* Confessions Feed */}
-        <div className="space-y-6">
-          {confessions.map((confession) => (
-            <ConfessionCard
-              key={confession.id}
-              id={confession.id}
-              content={confession.content}
-              timestamp={confession.timestamp}
-              likes={confession.likes}
-              isAnonymous={confession.isAnonymous}
-              isEncrypted={confession.isEncrypted}
-            />
-          ))}
-        </div>
-
-        {/* Load more indicator */}
-        <div className="text-center mt-8">
-          <div className="text-neon-cyan mono-text animate-pulse">
-            LOADING MORE CONFESSIONS...
+        {/* Public Confessions Stats */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neon-pink/30 bg-card-vaporwave">
+            <span className="text-sm text-muted-foreground mono-text">
+              {publicConfessions.length} public confession
+              {publicConfessions.length !== 1 ? "s" : ""} in the stream
+            </span>
           </div>
         </div>
+
+        {/* Public Confessions Feed */}
+        {publicConfessions.length > 0 ? (
+          <div className="space-y-6">
+            {publicConfessions.map((confession, index) => {
+              console.log(
+                `📺 Rendering public confession ${index + 1}/${publicConfessions.length}:`,
+                {
+                  id: confession.confessionId.toString(),
+                  likes: confession.likes.toString(),
+                  isAnonymous:
+                    confession.sender ===
+                    "0x0000000000000000000000000000000000000000",
+                }
+              );
+
+              return (
+                <ConfessionCard
+                  key={`public-${confession.confessionId}-${index}`}
+                  id={confession.confessionId.toString()}
+                  content={confession.content}
+                  timestamp={formatTimestamp(confession.timestamp)}
+                  likes={Number(confession.likes)}
+                  isAnonymous={
+                    confession.sender ===
+                    "0x0000000000000000000000000000000000000000"
+                  }
+                  isEncrypted={false} // Public confessions are already decrypted
+                  sender={confession.sender}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">👻</div>
+            <h2 className="text-2xl font-orbitron text-neon-cyan mb-4">
+              THE VOID ECHOES
+            </h2>
+            <p className="text-muted-foreground mono-text mb-4">
+              No public confessions yet. The digital consciousness awaits your
+              thoughts.
+            </p>
+            <p className="text-sm text-neon-purple mono-text">
+              Visit your Inbox to decrypt and share your private confessions
+              with the world.
+            </p>
+          </div>
+        )}
+
+        {/* Load more indicator - only show if we have confessions */}
+        {publicConfessions.length > 0 && (
+          <div className="text-center mt-8">
+            <div className="text-neon-cyan mono-text animate-pulse">
+              END OF CURRENT TRANSMISSION STREAM
+            </div>
+            <div className="text-xs text-muted-foreground mono-text mt-2">
+              New public confessions will appear automatically
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
